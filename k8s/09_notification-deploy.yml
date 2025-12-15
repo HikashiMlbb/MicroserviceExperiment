@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-microservices
+  labels:
+    app.kubernetes.io/name: notification
+    app.kubernetes.io/component: notification-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: notification-pod
+      app.kubernetes.io/component: notification-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: notification-pod
+        app.kubernetes.io/component: notification-api
+    spec:
+      initContainers:
+        - name: wait-db
+          image: postgres:16-alpine
+          command: ['sh', '-c']
+          args:
+            - |
+                while !pg_isready -h db-svc.default.svc.cluster.local -p 5432 -U postgres; do
+                  echo "Database is not available now."
+                  sleep 5
+                done
+                
+        - name: wait-rabbit
+          image: busybox
+          command: ['sh', '-c']
+          args:
+            - |
+                until nc -z rabbit-mq.default.svc.cluster.local 5672; do
+                  echo "RabbitMQ is not available now."
+                  sleep 5
+                done
+                
+      containers:
+        - name: msvc
+          image: hikashi/msvc-notification:72c37df
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+          env:
+            - name: RABBITMQ__CONNECTION_STRING
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: rabbitmq_connection_string
+            - name: RABBITMQ__QUEUE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: rabbitmq_queue_name
+            - name: SMTP__EMAIL_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: smtp_email_name
+            - name: SMTP__EMAIL_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: smtp_email_address
+            - name: SMTP__HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: smtp_host
+            - name: SMTP__PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: smtp_port
+            - name: SMTP__USE_SSL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: smtp_ssl
+            - name: SMTP__LOGIN
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: smtp_login
+            - name: SMTP__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: smtp_password

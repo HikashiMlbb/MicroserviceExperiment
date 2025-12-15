@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: database
+  labels:
+    app.kubernetes.io/component: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: database
+      app.kubernetes.io/component: database
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: database
+        app.kubernetes.io/component: database
+    spec:
+      initContainers:
+        - name: extract-password
+          image: busybox
+          command: ['sh', '-c']
+          args:
+            - |
+                echo $CONN_STRING
+                PASSWORD=$(echo "$CONN_STRING" | sed -n 's/.*Password=\([^;]*\).*/\1/p')
+                echo $PASSWORD > /run/secrets/passwd
+          
+          env:
+            - name: CONN_STRING
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: connection_string
+          
+          volumeMounts:
+            - mountPath: /run/secrets
+              name: secrets-dir
+      
+      containers:
+        - name: main
+          image: postgres:16
+          ports:
+            - name: db
+              containerPort: 5432
+              protocol: TCP
+          
+          env:
+            - name: POSTGRES_PASSWORD_FILE
+              value: "/run/secrets/passwd"
+
+          volumeMounts:
+            - mountPath: /run/secrets
+              name: secrets-dir
+
+            - mountPath: /var/lib/postgresql/data
+              name: db-pvc
+
+
+      volumes:
+        - name: secrets-dir
+          emptyDir:
+            sizeLimit: 10Mi
+          
+  
+  volumeClaimTemplates:
+    - metadata:
+        name: db-pvc
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: "local-path"
+        resources:
+          requests:
+            storage: 10Gi
