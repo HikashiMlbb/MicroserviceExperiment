@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: database
+spec:
+  replicas: 1
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbitmq
+spec:
+  replicas: 1
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+spec:
+  replicas: 1
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-microservices
+spec:
+  replicas: 1
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-microservices
+spec:
+  replicas: 1
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 1

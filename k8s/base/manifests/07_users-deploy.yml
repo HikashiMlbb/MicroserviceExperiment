@@ -1,21 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: notification-microservices
+  name: users-microservices
   labels:
-    app.kubernetes.io/name: notification
-    app.kubernetes.io/component: notification-api
+    app.kubernetes.io/name: users
+    app.kubernetes.io/component: users-api
 spec:
-  replicas: 3
   selector:
     matchLabels:
-      app.kubernetes.io/name: notification-pod
-      app.kubernetes.io/component: notification-api
+      app.kubernetes.io/name: users-pod
+      app.kubernetes.io/component: users-api
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: notification-pod
-        app.kubernetes.io/component: notification-api
+        app.kubernetes.io/name: users-pod
+        app.kubernetes.io/component: users-api
     spec:
       initContainers:
         - name: wait-db
@@ -37,10 +36,9 @@ spec:
                   echo "RabbitMQ is not available now."
                   sleep 5
                 done
-                
       containers:
-        - name: msvc
-          image: hikashi/msvc-notification:72c37df
+        - name: users-msvc
+          image: hikashi/msvc-users:issue89.v1
           ports:
             - name: http
               containerPort: 8080
@@ -52,66 +50,72 @@ spec:
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 5
-          
+
           livenessProbe:
             httpGet:
               path: /healthz
               port: 8080
             initialDelaySeconds: 30
-            periodSeconds: 10
             failureThreshold: 3
-
+            periodSeconds: 10
+          
           resources:
             requests:
               memory: "64Mi"
               cpu: "100m"
+
             limits:
               memory: "512Mi"
               cpu: "500m"
 
           env:
-            - name: RABBITMQ__CONNECTION_STRING
+            - name: CONNECTION_STRING
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: connection_string
+            - name: AUTHORIZATION_TOKEN__ISSUER
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: auth_token_issuer
+            - name: AUTHORIZATION_TOKEN__AUDIENCE
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: auth_token_audience
+            - name: AUTHORIZATION_TOKEN__EXPIRATION
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: auth_token_expiration
+            - name: AUTHORIZATION_TOKEN__KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: auth_token_key
+            - name: RESET_TOKEN__URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: reset_token_url
+            - name: RESET_TOKEN__EXPIRATION
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: reset_token_expiration
+            - name: RABBIT_MQ__CONNECTION_STRING
               valueFrom:
                 configMapKeyRef:
                   name: app-config
                   key: rabbitmq_connection_string
-            - name: RABBITMQ__QUEUE_NAME
+            - name: RABBIT_MQ__QUEUE_NAME
               valueFrom:
                 configMapKeyRef:
                   name: app-config
                   key: rabbitmq_queue_name
-            - name: SMTP__EMAIL_NAME
+            - name: CACHE_CONNECTION
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: smtp_email_name
-            - name: SMTP__EMAIL_ADDRESS
-              valueFrom:
-                configMapKeyRef:
-                  name: app-config
-                  key: smtp_email_address
-            - name: SMTP__HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: app-config
-                  key: smtp_host
-            - name: SMTP__PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: app-config
-                  key: smtp_port
-            - name: SMTP__USE_SSL
-              valueFrom:
-                configMapKeyRef:
-                  name: app-config
-                  key: smtp_ssl
-            - name: SMTP__LOGIN
-              valueFrom:
-                secretKeyRef:
-                  name: app-secrets
-                  key: smtp_login
-            - name: SMTP__PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: app-secrets
-                  key: smtp_password
+                  key: cache_connection_string

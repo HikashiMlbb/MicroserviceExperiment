@@ -1,0 +1,15 @@
+resources: [../../base]
+
+configMapGenerator:
+  - name: app-config
+    behavior: replace
+    env: resources/dev-config.env
+
+secretGenerator:
+  - name: app-secrets
+    behavior: replace
+    env: resources/dev-secrets.env
+
+patches:
+  - path: patches/replicas.yml
+
