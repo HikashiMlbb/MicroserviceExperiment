@@ -21,16 +21,14 @@ spec:
           command: ['sh', '-c']
           args:
             - |
-                echo $CONN_STRING
-                PASSWORD=$(echo "$CONN_STRING" | sed -n 's/.*Password=\([^;]*\).*/\1/p')
                 echo $PASSWORD > /run/secrets/passwd
           
           env:
-            - name: CONN_STRING
+            - name: PASSWORD
               valueFrom:
-                configMapKeyRef:
-                  name: app-config
-                  key: connection_string
+                secretKeyRef:
+                  name: app-secrets
+                  key: db.pass
           
           volumeMounts:
             - mountPath: /run/secrets

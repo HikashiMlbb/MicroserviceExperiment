@@ -69,48 +69,65 @@ spec:
               cpu: "500m"
 
           env:
-            - name: RABBITMQ__CONNECTION_STRING
+            - name: RABBIT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: rabbit.user
+            - name: RABBIT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: rabbit.pass
+            - name: RABBIT_HOST
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: rabbitmq_connection_string
+                  key: rabbit.host
+            - name: RABBIT_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: rabbit.port
+            - name: RABBITMQ__CONNECTION_STRING
+              value: "amqp://$(RABBIT_USER):$(RABBIT_PASS)@$(RABBIT_HOST):$(RABBIT_PORT)"
             - name: RABBITMQ__QUEUE_NAME
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: rabbitmq_queue_name
+                  key: rabbit.queue
             - name: SMTP__EMAIL_NAME
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: smtp_email_name
+                  key: smtp.name
             - name: SMTP__EMAIL_ADDRESS
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: smtp_email_address
+                  key: smtp.address
             - name: SMTP__HOST
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: smtp_host
+                  key: smtp.host
             - name: SMTP__PORT
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: smtp_port
+                  key: smtp.port
             - name: SMTP__USE_SSL
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: smtp_ssl
+                  key: smtp.use_ssl
             - name: SMTP__LOGIN
               valueFrom:
                 secretKeyRef:
                   name: app-secrets
-                  key: smtp_login
+                  key: smtp.user
             - name: SMTP__PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: app-secrets
-                  key: smtp_password
+                  key: smtp.pass
