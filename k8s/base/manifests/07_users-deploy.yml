@@ -69,53 +69,92 @@ spec:
               cpu: "500m"
 
           env:
-            - name: CONNECTION_STRING
+            - name: DB_HOST
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: connection_string
+                  key: db.host
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: db.port
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: db.name
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: db.user
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: db.pass
+            - name: CONNECTION_STRING
+              value: "Host=$(DB_HOST);Port=$(DB_PORT);Database=$(DB_NAME);Username=$(DB_USER);Password=$(DB_PASS)"
             - name: AUTHORIZATION_TOKEN__ISSUER
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: auth_token_issuer
+                  key: auth_token.issuer
             - name: AUTHORIZATION_TOKEN__AUDIENCE
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: auth_token_audience
+                  key: auth_token.audience
             - name: AUTHORIZATION_TOKEN__EXPIRATION
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: auth_token_expiration
+                  key: auth_token.expiration
             - name: AUTHORIZATION_TOKEN__KEY
               valueFrom:
                 secretKeyRef:
                   name: app-secrets
-                  key: auth_token_key
+                  key: auth_token.key
             - name: RESET_TOKEN__URL
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: reset_token_url
+                  key: reset_token.url
             - name: RESET_TOKEN__EXPIRATION
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: reset_token_expiration
-            - name: RABBIT_MQ__CONNECTION_STRING
+                  key: reset_token.expiration
+            - name: RABBIT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: rabbit.user
+            - name: RABBIT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: rabbit.pass
+            - name: RABBIT_HOST
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: rabbitmq_connection_string
+                  key: rabbit.host
+            - name: RABBIT_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: rabbit.port
+            - name: RABBIT_MQ__CONNECTION_STRING
+              value: "amqp://$(RABBIT_USER):$(RABBIT_PASS)@$(RABBIT_HOST):$(RABBIT_PORT)"
             - name: RABBIT_MQ__QUEUE_NAME
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: rabbitmq_queue_name
+                  key: rabbit.queue
             - name: CACHE_CONNECTION
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: cache_connection_string
+                  key: cache.conn_string
