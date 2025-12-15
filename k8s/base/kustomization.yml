@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/managed-by: kustomize
+
+configMapGenerator:
+  - name: app-config
+    env: app-config.env
+
+secretGenerator:
+  - name: app-secrets
+    env: app-secrets.env
+
+resources:
+  - manifests/01_database-sts.yml
+  - manifests/02_database-svc.yml
+  - manifests/03_rabbit-sts.yml
+  - manifests/04_rabbit-svc.yml
+  - manifests/05_redis-sts.yml
+  - manifests/06_redis-svc.yml
+  - manifests/07_users-deploy.yml
+  - manifests/08_users-svc.yml
+  - manifests/09_notification-deploy.yml
+  - manifests/10_notification-svc.yml
+  - manifests/11_gateway-config.yml
+  - manifests/12_gateway-deploy.yml
+  - manifests/13_gateway-svc.yml
+  - manifests/14_ingress.yml
