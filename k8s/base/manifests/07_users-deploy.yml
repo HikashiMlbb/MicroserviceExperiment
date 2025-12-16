@@ -16,6 +16,10 @@ spec:
         app.kubernetes.io/name: users-pod
         app.kubernetes.io/component: users-api
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+
       initContainers:
         - name: wait-db
           image: postgres:16-alpine
