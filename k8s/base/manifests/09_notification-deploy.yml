@@ -16,6 +16,10 @@ spec:
         app.kubernetes.io/name: notification-pod
         app.kubernetes.io/component: notification-api
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+
       initContainers:
         - name: wait-db
           image: postgres:16-alpine
