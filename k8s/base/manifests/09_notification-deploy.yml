@@ -43,7 +43,7 @@ spec:
                 
       containers:
         - name: msvc
-          image: hikashi/msvc-notification:72c37df
+          image: ghcr.io/hikashimlbb/microserviceexperiment.notification:174951a
           ports:
             - name: http
               containerPort: 8080

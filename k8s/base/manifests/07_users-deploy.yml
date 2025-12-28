@@ -42,7 +42,7 @@ spec:
                 done
       containers:
         - name: users-msvc
-          image: hikashi/msvc-users:issue89.v1
+          image: ghcr.io/hikashimlbb/microserviceexperiment.users:4b25020
           ports:
             - name: http
               containerPort: 8080
@@ -162,3 +162,29 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: cache.conn_string
+          
+          volumeMounts:
+            - mountPath: /var/templates/email.html
+              subPath: email.html
+              name: email-template
+
+      volumes:
+        - name: email-template
+          configMap:
+            name: user-msvc-templates
+            items:
+              - key: email.html
+                path: email.html
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-msvc-templates
+data:
+  email.html: |
+    <h1>We're detected you're trying to reset password. If it was you, please, follow the link below:</h1>
+    <p><a href="${{ token }}">Click here to reset password...</a></p>
+    <p>But if it wasn't you, please, ignore this email.</p>
+    <p>Best wishes, Hikashi no Development!</p>

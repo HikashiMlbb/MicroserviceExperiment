@@ -29,3 +29,7 @@ resources:
   - manifests/12_gateway-deploy.yml
   - manifests/13_gateway-svc.yml
   - manifests/14_ingress.yml
+  # Ingress-NGINX
+  - https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.14.1/deploy/static/provider/cloud/deploy.yaml
+  # Rancher Local Path
+  - https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.32/deploy/local-path-storage.yaml
