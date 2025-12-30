@@ -50,3 +50,8 @@ graph TB
     classDef databaseStyle fill:#c62828,stroke:#b71c1c,stroke-width:2px,color:white
     classDef cluster fill:#1a237e10,stroke:#3949ab,stroke-width:2px,stroke-dasharray:5 5
 ```
+
+# My Application Projects:
+- [API Gateway](https://github.com/HikashiMlbb/MicroserviceExperiment.Gateway)
+- [Users Microservice](https://github.com/HikashiMlbb/MicroserviceExperiment.Users)
+- [Notification Microservice](https://github.com/HikashiMlbb/MicroserviceExperiment.Notification)
